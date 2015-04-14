@@ -9,7 +9,7 @@ for easier inspection.
 Use it to test applications that call `sendmail`, like **PHP `mail()`** function:
 
 1. install a test local SMTP mailcatcher like
-[MailDev](https://github.com/djfarrelly/MailDev))
+[MailDev](https://github.com/djfarrelly/MailDev)
 or [MailCatcher](https://github.com/sj26/mailcatcher)
 2. replace `sendmail` bin with catchmail
 (in PHP, add directive: `sendmail_path = /usr/bin/env ./catchmail`)
@@ -32,7 +32,7 @@ $ catchmail
 ## Build, test, contribute
 You need to have `git` and `node` (v 0.**12** or later) installed 
 
-```bash
+```
 git clone https://github.com/xavierpriour/catchmail-node.git
 cd catchmail-node
 npm install
