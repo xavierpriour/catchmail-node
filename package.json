@@ -1,6 +1,6 @@
 {
   "name": "catchmail",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a sendmail command line replacement for mail testing",
   "keywords": [
     "sendmail",

@@ -83,17 +83,21 @@ describe('catchmail', function() {
   });
 
   describe('cli', function() {
-    function runCli(args, cb) {
-      var cmd = root + 'bin/cli.js' + (args ? ' '.concat(args) : '');
+    function runCli(args, stdinAsStr) {
+      var cmd = stdinAsStr ? 'echo "' + stdinAsStr + '" | ' : '';
+      cmd += root + 'bin/cli.js' + (args ? ' '.concat(args) : '');
       var out = cp.execSync(cmd);
       return out.toString();
     }
 
+    // todo NO, should read stdin!
+    /*
     it('should display usage when 0 args', function() {
       var out;
       (function() {out = runCli();}).should.not.throw();
       out.should.match(/^(\s)*Usage:/);
     });
+    */
 
     it('should display version with --version', function() {
       var out;
@@ -109,6 +113,7 @@ describe('catchmail', function() {
       opt.port.should.equal(9999);
     });
 
+    // todo NO, should read stdin!
     it('should fail if no message is supplied', function() {
       var out;
       (function() {out = runCli('--ip 1.2.3.4');}).should.throw();
@@ -118,9 +123,9 @@ describe('catchmail', function() {
     it('should set message when passed some data', function() {
       var msg = 'aren adenrsn rnerds';
       var out;
-      (function() {out = runCli('--dump ' + msg);}).should.not.throw();
+      (function() {out = runCli('--dump', msg);}).should.not.throw();
       var opt = JSON.parse(out);
-      opt.message.should.equal(msg);
+      opt.message.should.equal(msg + '\n');
     });
 
     // this test only work with an outside maildev manually launched, dunno why

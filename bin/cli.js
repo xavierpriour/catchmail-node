@@ -32,50 +32,61 @@ var CLI = function() {
         .parse(process.argv);
 
     // no args provided -> display usage
-    if (!process.argv.slice(2).length) {
-      program.help();
-    }
+    //if (!process.argv.slice(2).length) {
+    //  program.help();
+    //}
 
     if (program.ip) { options.ip = program.ip; }
     if (program.port) { options.port = program.port; }
     if (program.from) { options.from = program.from; }
     if (program.verbose) { options.verbose = true; }
 
-    message = program.args.join(' ');
+    //message = program.args.join(' ');
     //console.log('message ' + message);
 
-    if (program.dump) {
-      // if --dump just display options
-      var opt = merge.clone(options);
-      if (message) { opt.message = message; }
-      console.log(JSON.stringify(opt));
-      process.exit(0);
-    } else {
-      if (!message) {
-        logError('missing message text');
-        process.exit(70); // EX_SOFTWARE
-      } else {
-        catchmail.init(options);
-        // todo parse message to build msg object
-        var msg = {
-          from: 'catchmail@testing.xyz',
-          to: 'mailcatcher@testing.xyz',
-          subject: 'a captured mail sent at ' + (new Date()).toISOString(),
-          text: message
-        };
-        catchmail.send(msg, function(error, info) {
-          if (error) {
-            logError(error);
-            // todo analyze error and refine return code and message
-            process.exit(70);
-          } else {
-            console.log(options.verbose ? JSON.stringify(info) : 'mail sent succesfully');
-            process.exit(0);
-          }
-        });
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.on('readable', function() {
+      var chunk = process.stdin.read();
+      if (chunk !== null) {
+        message += chunk;
+        //process.stdout.write('data: ' + chunk);
       }
-      //throw('not implemented');
-    }
+    });
+
+    process.stdin.on('end', function() {
+      if (program.dump) {
+        // if --dump just display options
+        var opt = merge.clone(options);
+        if (message) { opt.message = message; }
+        console.log(JSON.stringify(opt));
+        process.exit(0);
+      } else {
+        if (!message) {
+          logError('missing message text');
+          process.exit(70); // EX_SOFTWARE
+        } else {
+          catchmail.init(options);
+          // todo parse message to build msg object
+          var msg = {
+            from: 'catchmail@testing.xyz',
+            to: 'mailcatcher@testing.xyz',
+            subject: 'a captured mail sent at ' + (new Date()).toISOString(),
+            text: message
+          };
+          catchmail.send(msg, function(error, info) {
+            if (error) {
+              logError(error);
+              // todo analyze error and refine return code and message
+              process.exit(70);
+            } else {
+              console.log(options.verbose ? JSON.stringify(info) : 'mail sent succesfully');
+              process.exit(0);
+            }
+          });
+        }
+      }
+    });
   };
 };
 
