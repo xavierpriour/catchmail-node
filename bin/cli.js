@@ -4,6 +4,7 @@ var fs = require('fs');
 var merge = require('merge');
 var path = require('path');
 var program = require('commander');
+var mailParser = require('mailparser').MailParser;
 
 var root = path.join(path.dirname(fs.realpathSync(__filename)), '../');
 var catchmail = require(root + 'lib/catchmail.js');
@@ -55,9 +56,10 @@ var CLI = function() {
     });
 
     process.stdin.on('end', function() {
+      catchmail.init(options);
       if (program.dump) {
         // if --dump just display options
-        var opt = merge.clone(options);
+        var opt = catchmail.options();
         if (message) { opt.message = message; }
         console.log(JSON.stringify(opt));
         process.exit(0);
@@ -66,24 +68,45 @@ var CLI = function() {
           logError('missing message text');
           process.exit(70); // EX_SOFTWARE
         } else {
-          catchmail.init(options);
           // todo parse message to build msg object
-          var msg = {
-            from: 'catchmail@testing.xyz',
-            to: 'mailcatcher@testing.xyz',
-            subject: 'a captured mail sent at ' + (new Date()).toISOString(),
-            text: message
-          };
-          catchmail.send(msg, function(error, info) {
-            if (error) {
-              logError(error);
-              // todo analyze error and refine return code and message
-              process.exit(70);
-            } else {
-              console.log(options.verbose ? JSON.stringify(info) : 'mail sent succesfully');
-              process.exit(0);
-            }
+          var mp = new mailParser();
+          mp.on('end', function(mail) {
+            //console.log("From:", mail.from); //[{address:'sender@example.com',name:'Sender Name'}]
+            //console.log("Subject:", mail.subject); // Hello world!
+            //console.log("Text body:", mail.text); // How are you today?
+            // we have to remove raw header property,
+            // or it will be parsed again by nodemailer and dupe all header fields
+            mail.headers = null;
+            catchmail.send(mail, function(error, info) {
+              if (error) {
+                logError(error);
+                // todo analyze error and refine return code and message
+                process.exit(70);
+              } else {
+                console.log(options.verbose ? JSON.stringify(info) : 'mail sent succesfully');
+                process.exit(0);
+              }
+            });
           });
+          // send the email source to the parser
+          mp.write(message);
+          mp.end();
+          //var msg = {
+          //  from: 'catchmail@testing.xyz',
+          //  to: 'mailcatcher@testing.xyz',
+          //  subject: 'a captured mail sent at ' + (new Date()).toISOString(),
+          //  text: message
+          //};
+          //catchmail.send(msg, function(error, info) {
+          //  if (error) {
+          //    logError(error);
+          //    // todo analyze error and refine return code and message
+          //    process.exit(70);
+          //  } else {
+          //    console.log(options.verbose ? JSON.stringify(info) : 'mail sent succesfully');
+          //    process.exit(0);
+          //  }
+          //});
         }
       }
     });

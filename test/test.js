@@ -20,6 +20,7 @@ maildev.on('new', function(email) {
   maildev.received = email;
 });
 
+/* jscs:disable validateQuoteMarks */
 describe('catchmail', function() {
   var cm = require('../lib/catchmail.js');
   var defaults = cm.defaults();
@@ -85,7 +86,8 @@ describe('catchmail', function() {
   describe('cli', function() {
     function runCli(args, stdinAsStr) {
       var cmd = stdinAsStr ? 'echo "' + stdinAsStr + '" | ' : '';
-      cmd += root + 'bin/cli.js' + (args ? ' '.concat(args) : '');
+      cmd += root + 'bin/cli.js' + (args ? ' '.concat(args) : ' ');
+      console.log('runCli ' + cmd);
       var out = cp.execSync(cmd);
       return out.toString();
     }
@@ -120,26 +122,36 @@ describe('catchmail', function() {
       should.not.exist(out);
     });
 
-    it('should set message when passed some data', function() {
-      var msg = 'aren adenrsn rnerds';
+    it('should set message from stdin', function() {
+      var msg = 'From: \'Sender Name\' <sender@example.com>\r\n' +
+        'To: \'Receiver Name\' <receiver@example.com>\r\n' +
+        'Subject: Hello world\r\n' +
+        '\r\n' +
+        'How are you today?';
       var out;
       (function() {out = runCli('--dump', msg);}).should.not.throw();
       var opt = JSON.parse(out);
+      console.log(opt);
       opt.message.should.equal(msg + '\n');
     });
 
-    // this test only work with an outside maildev manually launched, dunno why
+    // this test ONLY work with an outside maildev manually launched, dunno why
+    // (probably something to do with escaping characters and line feeds)
     // and using an outside server blows the previous tests...
     // so for the moment, we'll dispense with it!
-    /*
-    it('should send message when ok', function() {
-      var msg = 'body of test message';
-      var out;
-      (function() {out = runCli('--verbose ' + msg);}).should.not.throw();
-      console.log(out);
-      var sent = JSON.parse(out);
-      sent.accepted.should.have.length.above(0);
-    });
-    */
+    // --> manually test by calling:
+    // echo "From: 'Sender Name' <sender@example.com>\r\nTo: 'Receiver Name' <receiver@example.com>\r\nSubject: Hello world\r\n\r\nHow are you today?" | /Users/Xavier/xProjects/catchmail-node/bin/cli.js
+    //it('should set headers from input', function() {
+    //  console.log(cm.option('ip'));
+    //  var msg = "From: 'Sender Name' <sender@example.com>\r\n" +
+    //    "To: 'Receiver Name' <receiver@example.com>\r\n" +
+    //    "Subject: Hello world\r\n" +
+    //    "\r\n" +
+    //    "How are you today?";
+    //  var out;
+    //  (function() {out = runCli(null, msg);}).should.not.throw();
+    //  var mail = maildev.received;
+    //  console.log(mail);
+    //});
   });
 });

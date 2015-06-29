@@ -1,4 +1,7 @@
 ## Release History
+__1.1.0__
+  
+  * parses email header text and uses it: mail appears as it would to client
 
 __1.0.1__
   

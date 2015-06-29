@@ -2,9 +2,7 @@
 A drop-in `sendmail` command line replacement built in Javascript with Node for testing.
 
 It will forward all your mails to a testing SMTP mail catcher
-(we recommend [MailDev](https://github.com/djfarrelly/MailDev)),
-and stuff all your mail parameters (including subject, addresses,...) into the mail body,
-for easier inspection.
+(we recommend [MailDev](https://github.com/djfarrelly/MailDev)).
 
 Use it to test applications that call `sendmail`, like **PHP `mail()`** function:
 
