@@ -34,15 +34,15 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "chai": "^2.2.0",
+    "chai": "^3.0",
     "grunt": "^0.4.5",
     "grunt-contrib-jshint": "^0.11.1",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-jscs": "^1.6.0",
+    "grunt-jscs": "2.x",
     "grunt-mocha-test": "^0.12.7",
     "grunt-notify": "^0.4.1",
     "load-grunt-tasks": "^3.1.0",
-    "maildev": "^0.9.1",
+    "maildev": "0.x",
     "mocha": "^2.2.1"
   },
   "dependencies": {

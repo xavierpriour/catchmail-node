@@ -4,7 +4,7 @@ var fs = require('fs');
 var merge = require('merge');
 var path = require('path');
 var program = require('commander');
-var mailParser = require('mailparser').MailParser;
+var MailParser = require('mailparser').MailParser;
 
 var root = path.join(path.dirname(fs.realpathSync(__filename)), '../');
 var catchmail = require(root + 'lib/catchmail.js');
@@ -69,7 +69,7 @@ var CLI = function() {
           process.exit(70); // EX_SOFTWARE
         } else {
           // todo parse message to build msg object
-          var mp = new mailParser();
+          var mp = new MailParser();
           mp.on('end', function(mail) {
             //console.log("From:", mail.from); //[{address:'sender@example.com',name:'Sender Name'}]
             //console.log("Subject:", mail.subject); // Hello world!
@@ -91,22 +91,6 @@ var CLI = function() {
           // send the email source to the parser
           mp.write(message);
           mp.end();
-          //var msg = {
-          //  from: 'catchmail@testing.xyz',
-          //  to: 'mailcatcher@testing.xyz',
-          //  subject: 'a captured mail sent at ' + (new Date()).toISOString(),
-          //  text: message
-          //};
-          //catchmail.send(msg, function(error, info) {
-          //  if (error) {
-          //    logError(error);
-          //    // todo analyze error and refine return code and message
-          //    process.exit(70);
-          //  } else {
-          //    console.log(options.verbose ? JSON.stringify(info) : 'mail sent succesfully');
-          //    process.exit(0);
-          //  }
-          //});
         }
       }
     });

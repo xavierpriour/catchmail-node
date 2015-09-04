@@ -9,18 +9,8 @@ var pkg = require(root + 'package.json');
 
 // test mail server
 var maildev = new MailDev();
-maildev.nbMails = 0;
-maildev.received = false;
-maildev.reset = function() {
-  maildev.nbMails = 0;
-  maildev.received = false;
-};
-maildev.on('new', function(email) {
-  maildev.nbMails++;
-  maildev.received = email;
-});
+maildev.listen();
 
-/* jscs:disable validateQuoteMarks */
 describe('catchmail', function() {
   var cm = require('../lib/catchmail.js');
   var defaults = cm.defaults();
@@ -56,7 +46,7 @@ describe('catchmail', function() {
   });
 
   describe('send', function() {
-    it('should deliver 2 emails ok', function(done) {
+    it('should deliver email ok', function(done) {
       cm.init();
       var oldMails = maildev.nbMails;
       var msg = {
@@ -66,19 +56,16 @@ describe('catchmail', function() {
         text: 'rocking!'
       };
 
+      maildev.on('new', function(email) {
+        email.from[0].address.should.equal(msg.from);
+        email.to[0].address.should.equal(msg.to);
+        email.subject.should.equal(msg.subject);
+        email.text.should.equal(msg.text);
+      });
+
       cm.send(msg, function(error, info) {
-        maildev.nbMails.should.equal(oldMails + 1);
-        var received = maildev.received;
-        received.from[0].address.should.equal(msg.from);
-        received.to[0].address.should.equal(msg.to);
-        received.subject.should.equal(msg.subject);
-        received.text.should.equal(msg.text);
         should.not.exist(error);
-        cm.send(msg, function(error, info) {
-          maildev.nbMails.should.equal(oldMails + 2);
-          should.not.exist(error);
-          done();
-        });
+        done();
       });
     });
   });
@@ -91,15 +78,6 @@ describe('catchmail', function() {
       var out = cp.execSync(cmd);
       return out.toString();
     }
-
-    // todo NO, should read stdin!
-    /*
-    it('should display usage when 0 args', function() {
-      var out;
-      (function() {out = runCli();}).should.not.throw();
-      out.should.match(/^(\s)*Usage:/);
-    });
-    */
 
     it('should display version with --version', function() {
       var out;
@@ -134,24 +112,5 @@ describe('catchmail', function() {
       console.log(opt);
       opt.message.should.equal(msg + '\n');
     });
-
-    // this test ONLY work with an outside maildev manually launched, dunno why
-    // (probably something to do with escaping characters and line feeds)
-    // and using an outside server blows the previous tests...
-    // so for the moment, we'll dispense with it!
-    // --> manually test by calling:
-    // echo "From: 'Sender Name' <sender@example.com>\r\nTo: 'Receiver Name' <receiver@example.com>\r\nSubject: Hello world\r\n\r\nHow are you today?" | /Users/Xavier/xProjects/catchmail-node/bin/cli.js
-    //it('should set headers from input', function() {
-    //  console.log(cm.option('ip'));
-    //  var msg = "From: 'Sender Name' <sender@example.com>\r\n" +
-    //    "To: 'Receiver Name' <receiver@example.com>\r\n" +
-    //    "Subject: Hello world\r\n" +
-    //    "\r\n" +
-    //    "How are you today?";
-    //  var out;
-    //  (function() {out = runCli(null, msg);}).should.not.throw();
-    //  var mail = maildev.received;
-    //  console.log(mail);
-    //});
   });
 });
